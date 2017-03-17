@@ -6,18 +6,26 @@ require 'redis'
 require 'httparty'
 require 'oj'
 
-REDIS_HOST = ENV['REDIS_HOST'] || 'localhost'
-REDIS_PORT = ENV['REDIS_PORT'] || 6379
-INSIGHTS_INSERT_KEY   = ENV['INSIGHTS_INSERT_KEY']
-INSIGHTS_EVENT_URL    = ENV['INSIGHTS_EVENT_URL']
-INSIGHTS_EVENT_TYPE   = ENV['INSIGHTS_EVENT_TYPE'] || 'RedisInfo'
+REPORT_FREQUENCY_SEC = ENV['REPORT_FREQUENCY_SEC'] || 20
+REDIS_HOST           = ENV['REDIS_HOST'] || 'localhost'
+REDIS_PORT           = ENV['REDIS_PORT'] || 6379
+INSIGHTS_INSERT_KEY  = ENV['INSIGHTS_INSERT_KEY']
+INSIGHTS_EVENT_URL   = ENV['INSIGHTS_EVENT_URL']
+INSIGHTS_EVENT_TYPE  = ENV['INSIGHTS_EVENT_TYPE'] || 'RedisInfo'
 
 module Clockwork
-  
+  begin
+    @report_frequency = Integer(REPORT_FREQUENCY_SEC)
+    puts "Will report every #{@report_frequency} seconds..."
+  rescue ArgumentError
+    puts "You must specify an integer as REPORT_FREQUENCY_SEC!"
+    exit 1
+  end
+
   @redis = Redis.new(:host => REDIS_HOST, :port => REDIS_PORT)
   @redis_host_ip = Resolv.getaddress(REDIS_HOST)
 
-  every 20.seconds, 'pull redis INFO and post to Insights' do
+  every @report_frequency.seconds, 'pull redis INFO and post to Insights' do
     info = @redis.info
     info.merge!('host_name' => REDIS_HOST,
                 'host_ip'  => @redis_host_ip,
