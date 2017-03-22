@@ -2,11 +2,11 @@ PATH
   remote: .
   specs:
     redis-insights (0.8)
-      clockwork
-      httparty
-      oj
-      redis
-      trollop
+      clockwork (~> 2.0)
+      httparty (~> 0.14)
+      oj (~> 2.0)
+      redis (~> 3.3)
+      trollop (~> 2.1)
 
 GEM
   remote: https://rubygems.org/

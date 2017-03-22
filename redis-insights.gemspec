@@ -19,11 +19,11 @@ EOS
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ['lib']
 
-  spec.add_dependency 'clockwork'
-  spec.add_dependency 'redis'
-  spec.add_dependency 'httparty'
-  spec.add_dependency 'oj'
-  spec.add_dependency 'trollop'
+  spec.add_dependency 'clockwork', '~> 2.0'
+  spec.add_dependency 'redis', '~> 3.3'
+  spec.add_dependency 'httparty', '~> 0.14'
+  spec.add_dependency 'oj', '~> 2.0'
+  spec.add_dependency 'trollop', '~> 2.1'
 
   spec.required_ruby_version = '>= 1.9.3'
 end
