@@ -14,10 +14,27 @@ module Clockwork
     opt :insights_event_type, 'Type field for the Insights event', type: String, short: '-t', default: 'RedisInfo'
   end
 
+  loglevel = if !ENV['LOG_LEVEL'].nil?; ENV['LOG_LEVEL'].upcase; else 'INFO'; end
+  if %w(FATAL ERROR WARN INFO DEBUG).include? loglevel
+    loglevel = eval("Logger::#{loglevel}")
+  else
+    puts "Invalid log level #{ENV['LOG_LEVEL']}, defaulting to INFO"
+    loglevel = Logger::INFO
+  end
+
+  configure do |config|
+    logger = Logger.new(STDOUT)
+    logger.level = loglevel
+    config[:logger] = logger
+  end
+
   redis_insights = RedisInsights.new(opts[:redis_url], 
                                      opts[:insights_event_url],
                                      opts[:insights_insert_key],
                                      opts[:insights_event_type])
+  redis_insights.logger = Clockwork.manager.config[:logger]
+
+  @manager.config[:logger].warn "Starting Redis->Insights monitor of #{opts[:redis_url]}, posting to #{opts[:insights_event_url]} every #{opts[:report_frequency]} seconds..."
 
   every opts[:report_frequency].seconds, 'pull redis INFO and post to Insights' do
     redis_insights.info_to_insights
